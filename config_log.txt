@@ -1,0 +1,16 @@
+env_name: PongNoFrameskip-v4
+interval: 20
+do_train: False
+train_from_scratch: True
+mem_size: 1000000
+n_skills: 50
+reward_scale: 1
+seed: 123
+lr: 0.0003
+batch_size: 256
+max_n_episodes: 5000
+max_episode_len: 1000
+gamma: 0.99
+alpha: 0.1
+tau: 0.005
+n_hiddens: 300

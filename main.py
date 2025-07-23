@@ -1,10 +1,11 @@
-import gym
+import gymnasium as gym
+#import gym
 from Brain import SACAgent
 from Common import Play, Logger, get_params
 import numpy as np
 from tqdm import tqdm
-
-import mujoco_py
+import ale_py
+#import mujoco_py
 
 
 def concat_state_latent(s, z_, n):
@@ -15,11 +16,12 @@ def concat_state_latent(s, z_, n):
 
 if __name__ == "__main__":
     params = get_params()
-
+    gym.register_envs(ale_py)
     test_env = gym.make(params["env_name"])
-    n_states = test_env.observation_space.shape[0]
-    n_actions = test_env.action_space.shape[0]
-    action_bounds = [test_env.action_space.low[0], test_env.action_space.high[0]]
+    n_states = test_env.observation_space.shape[0] # continuous observation space
+    n_actions = test_env.action_space.n #discrete
+    #action_bounds = [test_env.action_space.low[0], test_env.action_space.high[0]] for continuous, 
+    action_bounds = [0, test_env.action_space.n - 1] # chec k where or how is this checked
 
     params.update({"n_states": n_states,
                    "n_actions": n_actions,
