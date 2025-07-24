@@ -1,6 +1,6 @@
-env_name: PongNoFrameskip-v4
+env_name: ALE/Pong-v5
 interval: 20
-do_train: False
+do_train: True
 train_from_scratch: True
 mem_size: 1000000
 n_skills: 50
