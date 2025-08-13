@@ -9,10 +9,12 @@ def get_params():
     parser.add_argument("--interval", default=20, type=int,
                         help="The interval specifies how often different parameters should be saved and printed,"
                              " counted by episodes.")
-    parser.add_argument("--do_train", action="store_false", # store_true or store_false
+    parser.add_argument("--do_train", action="store_true", default=True,  # Changed!
                         help="The flag determines whether to train the agent or play with it.")
-    parser.add_argument("--train_from_scratch", action="store_false", # 
+    
+    parser.add_argument("--train_from_scratch", action="store_true", default=True,  # Changed!
                         help="The flag determines whether to train from scratch or continue previous tries.")
+    
     parser.add_argument("--mem_size", default=int(1e+6), type=int, help="The memory size.")
     parser.add_argument("--n_skills", default=50, type=int, help="The number of skills to learn.")
     parser.add_argument("--reward_scale", default=1, type=float, help="The reward scaling factor introduced in SAC.")
@@ -30,11 +32,11 @@ def get_params():
                     "max_n_episodes": 5000,
                     "max_episode_len": 1000,
                     "gamma": 0.99,
-                    "alpha": 0.1,
+                    "alpha": 0.5,
                     "tau": 0.005,
-                    "n_hiddens": 300,
-   \
-                      }
+                    "n_hiddens": 200,
+   
+                    }
     # endregion
     total_params = {**vars(parser_params), **default_params}
 
