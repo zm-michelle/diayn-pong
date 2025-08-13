@@ -128,4 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.idea/
+.idea/Checkpoints/
+*.pth
+*.pt
+
