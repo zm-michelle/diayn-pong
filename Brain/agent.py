@@ -6,6 +6,8 @@ from torch import from_numpy
 from torch.optim.adam import Adam
 from torch.nn.functional import log_softmax
 from torch.nn import functional as F
+import time
+from torch.utils.tensorboard import SummaryWriter
 
 class SACAgent:
     def __init__(self,
@@ -19,6 +21,8 @@ class SACAgent:
         #self.memory = Memory(self.config["mem_size"], self.config["seed"])
         self.memory = Memory(self.config["mem_size"], self.config["seed"])
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        print("Device: ", self.device)
+        time.sleep(15)
 
         torch.manual_seed(self.config["seed"])
         print("\n\nn_actions: ", self.config["n_actions"])
@@ -53,6 +57,7 @@ class SACAgent:
         self.q_value2_opt = Adam(self.q_value_network2.parameters(), lr=self.config["lr"])
         self.policy_opt = Adam(self.policy_network.parameters(), lr=self.config["lr"])
         self.discriminator_opt = Adam(self.discriminator.parameters(), lr=self.config["lr"])
+        self.writer = SummaryWriter()
 
     def choose_action(self, states):
         states = np.expand_dims(states, axis=0)
@@ -144,23 +149,9 @@ class SACAgent:
             expected_q = (action_probs * q_for_policy).sum(dim=-1)
             entropy = -(action_probs * log_probs).sum(dim=-1)
             policy_loss = -(expected_q + self.config["alpha"] * entropy).mean()
-
-            """target_value = q.detach() - self.config["alpha"] * action_logs.detach()
-            #target_value = q.detach() - self.config["alpha"] * action_probs.detach()#.unsqueeze(1)
-            print("target_value shape: ", target_value.shape)
-            value = self.value_network(states)  # [batch_size, 1]
-            print("value shape: ", value.shape)
-            value_loss = self.mse_loss(value, target_value)
-
-            # Extract just the observation part (first n_states elements)
-   
-            # logits = self.discriminator(torch.split(next_states, [self.n_states, self.n_skills], dim=-1)[0])
-            obs_only = torch.split(next_states, [self.n_states, self.n_skills], dim=-1)[0]
-            logits = self.discriminator(obs_only)
-            p_z = p_z.gather(-1, zs)
-            logq_z_ns = log_softmax(logits, dim=-1)
-            rewards = logq_z_ns.gather(-1, zs).detach() - torch.log(p_z + 1e-6)
-            """
+            self.writer.add_scalar(f"Policy Loss, skill{zs[0]}", policy_loss)
+            self.writer.add_scalar(f"Entropy, skill {zs[0]}", entropy)
+     
             # Calculating the Q-Value target
             with torch.no_grad():
                 target_value = expected_q + self.config["alpha"] * entropy
@@ -168,10 +159,11 @@ class SACAgent:
                  #       self.config["gamma"] * self.value_target_network(next_states) * (~dones)
             value = self.value_network(states).squeeze(-1)  # [batch_size]
             value_loss = self.mse_loss(value, target_value)
-
+            self.writer.add_scalar(f"Value Network Loss, skill {zs[0]}", value_loss)
             raw_next_states = next_states[:, :self.n_states]
             discriminator_logits = self.discriminator(raw_next_states)
             discriminator_loss = self.cross_ent_loss(discriminator_logits, zs_flat)
+            self.writer.add_scalar(f"Discriminator Loss, skill {zs[0]}", discriminator_loss)
 
             p_z_gathered = p_z.gather(-1, zs).float()   # [batch_size, 1]
             log_q_z_ns = log_softmax(discriminator_logits, dim=-1).float()  # [batch_size, n_skills]

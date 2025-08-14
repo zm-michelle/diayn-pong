@@ -122,7 +122,7 @@ if __name__ == "__main__":
                 if done or truncated:
                     break
                     
-            writer.add_scalar("Reward/episode", episode_reward, episode)
+            writer.add_scalar(f"Reward/episode, skill{z}", episode_reward, episode)
 
 
             def get_random_state(random_generator):
