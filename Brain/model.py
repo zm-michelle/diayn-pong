@@ -87,7 +87,7 @@ class QvalueNetwork(nn.Module, ABC):
         return  q_values
        
 class PolicyNetwork(nn.Module, ABC):
-    def __init__(self, n_states, n_actions, action_bounds= None, n_hidden_filters=256):
+    def __init__(self, n_states, n_actions, n_hidden_filters=256):
         super(PolicyNetwork, self).__init__()
         self.n_states = n_states
         self.n_hidden_filters = n_hidden_filters

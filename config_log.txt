@@ -1,7 +1,7 @@
 env_name: ALE/Pong-v5
 interval: 20
-do_train: True
-train_from_scratch: True
+do_train: False
+train_from_scratch: False
 mem_size: 1000000
 n_skills: 50
 reward_scale: 1

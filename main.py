@@ -23,7 +23,7 @@ def concat_state_latent(s, z_, n):
 if __name__ == "__main__":
     params = get_params()
     gym.register_envs(ale_py)
-    test_env = gym.make(params["env_name"], obs_type="grayscale")
+    test_env = gym.make(params["env_name"], obs_type="grayscale",  render_mode='rgb_array')
     print('Action space: ', test_env.action_space)
     print('Observation space: ', test_env.observation_space)
     #n_states = test_env.observation_space.shape[0] # continuous observation space
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     test_env.close()
     del test_env, n_states, n_actions,  
     writer = SummaryWriter()
-    env = gym.make(params["env_name"], obs_type="grayscale")
+    env = gym.make(params["env_name"], obs_type="grayscale", render_mode='rgb_array')
 
     p_z = np.full(params["n_skills"], 1 / params["n_skills"])
     print("p_z: ",p_z)
@@ -151,5 +151,5 @@ if __name__ == "__main__":
         writer.flush()
     else:
         logger.load_weights()
-        player = Play(env, agent, n_skills=params["n_skills"])
+        player = Play(env, agent, n_skills=params["n_skills"],  max_episode_steps=params["max_episode_len"])
         player.evaluate()

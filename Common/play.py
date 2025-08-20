@@ -8,10 +8,11 @@ import os
 
 
 class Play:
-    def __init__(self, env, agent, n_skills):
+    def __init__(self, env, agent, n_skills,max_episode_steps):
         self.env = env
         self.agent = agent
         self.n_skills = n_skills
+        self.max_episode_steps = max_episode_steps
         self.agent.set_policy_net_to_cpu_mode()
         self.agent.set_policy_net_to_eval_mode()
         self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -20,26 +21,37 @@ class Play:
 
     @staticmethod
     def concat_state_latent(s, z_, n):
+        if not isinstance(s, tuple):
+            s = s.flatten()
+        #print("len s: ", len(s))
         z_one_hot = np.zeros(n)
         z_one_hot[z_] = 1
-        return np.concatenate([s, z_one_hot])
+     
+        result = np.concatenate([s, z_one_hot]) 
+        return result
 
     def evaluate(self):
 
         for z in range(self.n_skills):
             video_writer = cv2.VideoWriter(f"Vid/skill{z}" + ".avi", self.fourcc, 50.0, (250, 250))
-            s = self.env.reset()
+            s, _ = self.env.reset()
             s = self.concat_state_latent(s, z, self.n_skills)
             episode_reward = 0
-            for _ in range(self.env.spec.max_episode_steps):
+            for _ in range(self.max_episode_steps):
                 action = self.agent.choose_action(s)
-                s_, r, done, _ = self.env.step(action)
+                s_, r, done, truncated, _ = self.env.step(action)
+                #s_, r, done, _ = self.env.step(action)
                 s_ = self.concat_state_latent(s_, z, self.n_skills)
                 episode_reward += r
-                if done:
+                if done or truncated:
                     break
                 s = s_
-                I = self.env.render(mode='rgb_array')
+                #I = self.env.render(mode='rgb_array')
+                #if hasattr(self.env, 'render_mode'):
+                 #   self.env.render_mode = 'rgb_array'
+                #elif hasattr(self.env.unwrapped, 'render_mode'):
+                 #   self.env.unwrapped.render_mode = 'rgb_array'
+                I = self.env.render()
                 I = cv2.cvtColor(I, cv2.COLOR_RGB2BGR)
                 I = cv2.resize(I, (250, 250))
                 video_writer.write(I)
